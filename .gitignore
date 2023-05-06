@@ -1,0 +1,20 @@
+# Node.js related
+node_modules/
+*.log
+yarn.lock
+package-lock.json
+
+# TypeScript related
+*.tsbuildinfo
+*.js.map
+
+# Compiled JavaScript
+out/
+dist/
+*.vsix
+
+# Miscellaneous
+.vscode/
+.idea/
+*.iml
+.DS_Store
