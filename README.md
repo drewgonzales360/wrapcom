@@ -4,6 +4,8 @@
 
 Hard wrap any long comment lines.
 
+![demo](./docs/demo.gif)
+
 ## Requirements
 
 There are no requirements for this app.
