@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-export class CommentBlock {
+class CommentBlock {
   text: string;
   start: vscode.Position;
   end: vscode.Position;
@@ -12,8 +12,16 @@ export class CommentBlock {
   }
 }
 
-export function getCommentBlock(): CommentBlock {
-  const editor = vscode.window.activeTextEditor;
+export function wrapComment(editor: vscode.TextEditor, lineLength: number): vscode.TextEdit {
+  const prefix = getCommentPrefix(editor)
+  const commentBlock = getCommentBlock(editor, prefix)
+  const wrappedCommentText = wrapCommentText(commentBlock.text, prefix, lineLength)
+  const range = new vscode.Range(commentBlock.start, commentBlock.end);
+
+  return new vscode.TextEdit(range, wrappedCommentText);
+}
+
+function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBlock {
   if (!editor) {
     throw new Error('no editor');
   }
@@ -26,16 +34,16 @@ export function getCommentBlock(): CommentBlock {
   const lines = text.split("\n");
 
   let startLine = position.line;
-  while (startLine >= 0 && isComment(lines[startLine])) {
+  while (startLine >= 0 && isComment(prefix, lines[startLine])) {
     startLine--;
   }
 
   let endLine = position.line;
-  while (endLine < lines.length && isComment(lines[endLine])) {
+  while (endLine < lines.length && isComment(prefix, lines[endLine])) {
     endLine++;
   }
 
-  const commentText = lines.slice(startLine, endLine).map(l => stripComment(l)).join(" ");
+  const commentText = lines.slice(startLine, endLine).map(l => trimCommentPrefix(prefix, l)).join(" ");
 
   return new CommentBlock(
     commentText,
@@ -44,19 +52,30 @@ export function getCommentBlock(): CommentBlock {
   )
 }
 
+function wrapCommentText(comment: string, prefix: string, lineLength: number): string {
+  let actualLineLength = lineLength - prefix.length
+  if (actualLineLength < 0) {
+    actualLineLength = 0
+  }
+
+  const lines = splitLines(comment, actualLineLength)
+  return addCommentPrefix(prefix, lines)
+}
+
 function getLineLength(document: vscode.TextDocument, lineNumber: number): number {
   const line = document.lineAt(lineNumber);
   return line.text.length;
 }
 
-function isComment(line: string): boolean {
-  const trimmedLine = line.trim();
-  return trimmedLine.startsWith(getCommentPrefix());
+function isComment(prefix: string, line: string): boolean {
+  return line.trim().startsWith(prefix);
 }
 
-function stripComment(line: string): string {
-  const prefix = getCommentPrefix()
+function addCommentPrefix(prefix: string, lines: string[]): string {
+  return lines.map(line => `\n${prefix} ${line}`).join("");
+}
 
+function trimCommentPrefix(prefix: string, line: string): string {
   if (line.startsWith(prefix)) {
     return line.slice(prefix.length).trim();
   }
@@ -64,13 +83,13 @@ function stripComment(line: string): string {
   return line;
 }
 
-export function splitLines(str: string, maxLength: number): string[] {
+function splitLines(str: string, maxLength: number): string[] {
   const words = str.split(' ');
   const lines = [];
   let currentLine = '';
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
-    if (currentLine.length + word.length + 1 > maxLength) {
+    if (currentLine.length + word.length >= maxLength) {
       lines.push(currentLine.trim());
       currentLine = '';
     }
@@ -81,13 +100,7 @@ export function splitLines(str: string, maxLength: number): string[] {
   return lines;
 }
 
-export function addCommentPrefix(lines: string[]): string {
-  const prefix = getCommentPrefix()
-  return lines.map(line => `\n${prefix} ${line}`).join("");
-}
-
-function getCommentPrefix(): string {
-  const editor = vscode.window.activeTextEditor;
+function getCommentPrefix(editor: vscode.TextEditor): string {
   if (!editor) {
     return '';
   }
