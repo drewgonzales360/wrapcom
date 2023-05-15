@@ -3,7 +3,7 @@
   "displayName": "wrapcom",
   "publisher": "drewgonzales",
   "description": "Wraps comments to any width",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": "https://github.com/drewgonzales360/wrapcom",
   "engines": {
     "vscode": "^1.78.0"
