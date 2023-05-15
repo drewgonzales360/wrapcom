@@ -1,10 +1,10 @@
 {
-  "name": "linethewrapper",
-  "displayName": "linethewrapper",
+  "name": "wrapcom",
+  "displayName": "wrapcom",
   "publisher": "drewgonzales",
   "description": "Wraps comments to any width",
   "version": "0.0.1",
-  "repository": "https://github.com/drewgonzales360/linethewrapper",
+  "repository": "https://github.com/drewgonzales360/wrapcom",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -16,7 +16,7 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "Line The Wrapper",
+      "title": "WrapCom",
       "properties": {
         "LineLength": {
           "type": "number",
@@ -27,8 +27,8 @@
     },
     "commands": [
       {
-        "command": "linethewrapper.WrapLines",
-        "title": "linethewrapper: Wrap Lines"
+        "command": "wrapcom.WrapLines",
+        "title": "wrapcom: Wrap Lines"
       }
     ]
   },

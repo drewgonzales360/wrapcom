@@ -34,6 +34,6 @@ export function wrapLongCommentLines() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    const disposable = vscode.commands.registerCommand('linethewrapper.WrapLines', wrapLongCommentLines);
+    const disposable = vscode.commands.registerCommand('wrapcom.WrapLines', wrapLongCommentLines);
     context.subscriptions.push(disposable);
 }

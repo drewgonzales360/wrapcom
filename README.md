@@ -1,8 +1,8 @@
-# linethewrapper
+# WrapCom
 
 ## Features
 
-linethewrapper will wrap any long comment lines.
+Hard wrap any long comment lines.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ There are no requirements for this app.
 
 LineLength - default 80
 
-This sets the desired line length. When rewriting comments, Line The Wrapper will do it's best to ensure that the comment lines are less than 80 characters long, but will put as many words into a line as it can.
+This sets the desired line length. When rewriting comments, WrapCom will do it's best to ensure that the comment lines are less than 80 characters long, but will put as many words into a line as it can.
 
 ## Known Issues
 
