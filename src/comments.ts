@@ -1,11 +1,13 @@
 import * as vscode from "vscode";
 
 class CommentBlock {
+  indent: string;
   text: string;
   start: vscode.Position;
   end: vscode.Position;
 
-  constructor(text: string, start: vscode.Position, end: vscode.Position) {
+  constructor(indent: string, text: string, start: vscode.Position, end: vscode.Position) {
+    this.indent = indent;
     this.text = text;
     this.start = start;
     this.end = end;
@@ -15,10 +17,18 @@ class CommentBlock {
 export function wrapComment(editor: vscode.TextEditor, lineLength: number): vscode.TextEdit {
   const prefix = getCommentPrefix(editor)
   const commentBlock = getCommentBlock(editor, prefix)
-  const wrappedCommentText = wrapCommentText(commentBlock.text, prefix, lineLength)
+  const commentPrefixWithWhitespace = commentBlock.indent + prefix
+  const wrappedCommentText = wrapCommentText(commentBlock.text, commentPrefixWithWhitespace, lineLength)
   const range = new vscode.Range(commentBlock.start, commentBlock.end);
 
   return new vscode.TextEdit(range, wrappedCommentText);
+}
+
+export function cursorOnComment(editor: vscode.TextEditor): boolean {
+  const line = editor.selection.active.line
+  const text = editor.document.lineAt(line).text
+  const prefix = getCommentPrefix(editor)
+  return isComment(prefix, text)
 }
 
 function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBlock {
@@ -33,6 +43,8 @@ function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBloc
   const text = document.getText();
   const lines = text.split("\n");
 
+  const indent = getLeadingWhitespace(document.lineAt(position.line).text)
+
   let startLine = position.line;
   while (startLine >= 0 && isComment(prefix, lines[startLine])) {
     startLine--;
@@ -46,6 +58,7 @@ function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBloc
   const commentText = lines.slice(startLine, endLine).map(l => trimCommentPrefix(prefix, l)).join(" ");
 
   return new CommentBlock(
+    indent,
     commentText,
     new vscode.Position(startLine, 0),
     new vscode.Position(endLine-1, getLineLength(document, endLine - 1)),
@@ -76,6 +89,7 @@ function addCommentPrefix(prefix: string, lines: string[]): string {
 }
 
 function trimCommentPrefix(prefix: string, line: string): string {
+  line = line.trim()
   if (line.startsWith(prefix)) {
     return line.slice(prefix.length).trim();
   }
@@ -116,4 +130,10 @@ function getCommentPrefix(editor: vscode.TextEditor): string {
     default:
       return '';
   }
+}
+
+function getLeadingWhitespace(str: string) {
+  const leadingWhitespaceRegex = /^(\s+)/;
+  const match = str.match(leadingWhitespaceRegex);
+  return match ? match[0] : '';
 }

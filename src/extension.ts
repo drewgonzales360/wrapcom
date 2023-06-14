@@ -16,6 +16,10 @@ export function wrapLongCommentLines() {
         vscode.window.showErrorMessage("could not read line length setting")
     }
 
+    if (!comments.cursorOnComment(editor)) {
+        return
+    }
+
     const edit = comments.wrapComment(editor, lineLength)
 
     const workspaceEdit = new vscode.WorkspaceEdit();
