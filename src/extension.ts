@@ -20,7 +20,8 @@ export function wrapLongCommentLines() {
         return
     }
 
-    const edit = comments.wrapComment(editor, lineLength)
+    const commentBlock = comments.getCommentBlock(editor)
+    const edit = comments.wrapComment(commentBlock, lineLength)
 
     const workspaceEdit = new vscode.WorkspaceEdit();
     const document = editor.document;

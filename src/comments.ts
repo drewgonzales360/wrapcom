@@ -1,24 +1,21 @@
 import * as vscode from "vscode";
 
-class CommentBlock {
-  indent: string;
+export class CommentBlock {
+  prefix: string;
   text: string;
   start: vscode.Position;
   end: vscode.Position;
 
-  constructor(indent: string, text: string, start: vscode.Position, end: vscode.Position) {
-    this.indent = indent;
+  constructor(prefix: string, text: string, start: vscode.Position, end: vscode.Position) {
+    this.prefix = prefix;
     this.text = text;
     this.start = start;
     this.end = end;
   }
 }
 
-export function wrapComment(editor: vscode.TextEditor, lineLength: number): vscode.TextEdit {
-  const prefix = getCommentPrefix(editor)
-  const commentBlock = getCommentBlock(editor, prefix)
-  const commentPrefixWithWhitespace = commentBlock.indent + prefix
-  const wrappedCommentText = wrapCommentText(commentBlock.text, commentPrefixWithWhitespace, lineLength)
+export function wrapComment(commentBlock: CommentBlock, desiredLineLength: number): vscode.TextEdit {
+  const wrappedCommentText = wrapCommentText(commentBlock.text, commentBlock.prefix, desiredLineLength)
   const range = new vscode.Range(commentBlock.start, commentBlock.end);
 
   return new vscode.TextEdit(range, wrappedCommentText);
@@ -31,7 +28,7 @@ export function cursorOnComment(editor: vscode.TextEditor): boolean {
   return isComment(prefix, text)
 }
 
-function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBlock {
+export function getCommentBlock(editor: vscode.TextEditor): CommentBlock {
   if (!editor) {
     throw new Error('no editor');
   }
@@ -44,6 +41,8 @@ function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBloc
   const lines = text.split("\n");
 
   const indent = getLeadingWhitespace(document.lineAt(position.line).text)
+  const comment = getCommentPrefix(editor)
+  const prefix = indent + comment
 
   let startLine = position.line;
   while (startLine >= 0 && isComment(prefix, lines[startLine])) {
@@ -58,15 +57,15 @@ function getCommentBlock(editor: vscode.TextEditor, prefix: string): CommentBloc
   const commentText = lines.slice(startLine, endLine).map(l => trimCommentPrefix(prefix, l)).join(" ");
 
   return new CommentBlock(
-    indent,
+    prefix,
     commentText,
     new vscode.Position(startLine, 0),
     new vscode.Position(endLine-1, getLineLength(document, endLine - 1)),
   )
 }
 
-function wrapCommentText(comment: string, prefix: string, lineLength: number): string {
-  let actualLineLength = lineLength - prefix.length
+export function wrapCommentText(comment: string, prefix: string, desiredLineLength: number): string {
+  let actualLineLength = desiredLineLength - prefix.length
   if (actualLineLength < 0) {
     actualLineLength = 0
   }

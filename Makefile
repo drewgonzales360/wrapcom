@@ -6,3 +6,6 @@ build:
 
 publish: build
 	npx vsce publish
+
+test:
+	npm run test
